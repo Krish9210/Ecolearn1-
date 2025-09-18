@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoLearn - Learn & Play for a Greener Future</title>
+    <!-- Inline SVG favicon to avoid 404 on /favicon.ico -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%232d5a27'/%3E%3Cstop stop-color='%231e7f72' offset='1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='12' fill='white'/%3E%3Cpath d='M50 14c-14 2-24 10-28 22 6-4 12-6 18-6-8 4-14 12-16 20 10-4 18-10 22-18-2 6-6 12-12 18 12-2 20-12 22-26-2-4-4-8-6-10z' fill='url(%23g)'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Firebase Web SDK (compat) for simple inline usage -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <style>
+        :root {
+            --bg-gradient-start: #e8f5e8;
+            --bg-gradient-end: #f0f8ff;
+            --text-color: #2d5a27;
+            --card-bg: #ffffff;
+            --muted-text: #666666;
+            --accent-1: #4ecdc4;
+            --accent-2: #44a08d;
+            --navbar-start: #2d5a27;
+            --navbar-end: #1e7f72;
+            --border-color: #e0e0e0;
+            --shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        body.dark {
+            --bg-gradient-start: #0f1214;
+            --bg-gradient-end: #0b0d0f;
+            --text-color: #e6f1ef;
+            --card-bg: #161b22;
+            --muted-text: #a0a6ad;
+            --accent-1: #00d1b2;
+            --accent-2: #00a389;
+            --navbar-start: #0b3b32;
+            --navbar-end: #0a6a5c;
+            --border-color: #283040;
+            --shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation Styles */
+        .navbar {
+            background: linear-gradient(135deg, var(--navbar-start) 0%, var(--navbar-end) 100%);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-item a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item a:hover, .nav-item a.active {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        main {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .section {
+            display: none;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #2a4858 0%, var(--navbar-start) 100%);
+            color: #ffffff;
+            border-radius: 20px;
+            margin: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, var(--accent-1) 100%);
+            color: #ffffff;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* XP and Progress */
+        .user-stats {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .xp-container {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .xp-bar {
+            background: #e0e0e0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .xp-progress {
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .xp-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+
+        /* Quiz Section */
+        .quiz-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .question {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            border-color: var(--accent-1);
+            background: rgba(78,205,196,0.08);
+        }
+
+        .option input[type="radio"] {
+            margin-right: 1rem;
+            transform: scale(1.2);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* Feedback */
+        .feedback {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Badges */
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .badge-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .badge-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .badge-card.locked {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .badge-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Challenges */
+        .challenges-list {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .challenge-item {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .challenge-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .challenge-info {
+            flex: 1;
+        }
+
+        .challenge-title {
+            font-size: 1.2rem;
+            color: #2d5a27;
+            margin-bottom: 0.5rem;
+        }
+
+        .challenge-xp {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .btn-success {
+            background: #2bbd6e;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-success:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Leaderboard */
+        .leaderboard-table {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-top: 2rem;
+        }
+
+        .leaderboard-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .leaderboard-table th {
+            background: #2d5a27;
+            color: white;
+        }
+
+        .leaderboard-table tr:nth-child(even) {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .leaderboard-table .current-user {
+            background: rgba(255, 243, 205, 0.2);
+            font-weight: bold;
+        }
+
+        /* Profile */
+        .profile-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 3rem;
+            color: #ffffff;
+        }
+
+        /* Dark mode toggle button */
+        .theme-toggle {
+            display: flex; align-items: center; gap: .5rem; margin-left: 1rem;
+        }
+        .toggle-switch { position: relative; width: 52px; height: 28px; }
+        .toggle-switch input { display:none; }
+        .toggle-slider {
+            position:absolute; inset:0; cursor:pointer; border-radius:999px;
+            background: rgba(255,255,255,0.35); transition:.25s;
+            border:1px solid rgba(255,255,255,0.5);
+        }
+        .toggle-slider:before {
+            content:""; position:absolute; height:22px; width:22px; left:3px; top:2px; background:#fff; border-radius:50%; transition:.25s;
+            box-shadow: 0 2px 6px rgba(0,0,0,.2);
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #0a6a5c, #0b3b32);
+        }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(24px); }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0,0,0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -30px, 0);
+            }
+            70% {
+                transform: translate3d(0, -15px, 0);
+            }
+            90% {
+                transform: translate3d(0, -4px, 0);
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            animation: bounce 0.6s ease;
+        }
+
+        .modal-content h2 {
+            color: #2d5a27;
+            margin-bottom: 1rem;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 3000;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotateZ(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotateZ(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                flex-direction: column;
+                background: #2d5a27;
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                box-shadow: 0 10px 27px rgba(0,0,0,0.05);
+                padding: 2rem 0;
+                /* Prevent off-canvas menu from intercepting clicks */
+                pointer-events: none;
+            }
+
+            .nav-menu.active {
+                left: 0;
+                pointer-events: auto;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .user-stats {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .quiz-buttons {
+                justify-content: center;
+            }
+
+            .challenge-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: #2d5a27;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            border-radius: 2px;
+        }
+
+        /* Auth (minimal, scoped) */
+        .auth-actions { display: flex; gap: 0.5rem; margin-left: 1rem; position: relative; z-index: 1501; }
+        .auth-btn { 
+            background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.6);
+            padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; transition: .2s;
+        }
+        .auth-btn:hover { background: rgba(255,255,255,0.15); }
+        .modal-auth { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:2200; 
+            display:flex; align-items:center; justify-content:center; }
+        .modal-auth[hidden] { display:none; }
+        .modal-auth .card { background:#fff; width:90%; max-width:420px; border-radius:12px; padding:1.25rem 1.25rem 1rem; box-shadow:0 10px 30px rgba(0,0,0,.15); }
+        .modal-auth .card h3 { margin:0 0 .75rem; color:#2d5a27; }
+        .modal-auth .close-x { float:right; font-size:1.4rem; color:#666; cursor:pointer; }
+        .auth-form .form-row { margin:.75rem 0; text-align:left; }
+        .auth-form label { display:block; margin-bottom:.35rem; color:#2d5a27; font-weight:600; }
+        .auth-form input { width:100%; padding:.6rem .7rem; border:1px solid #ddd; border-radius:8px; font-size:1rem; }
+        .auth-form input:focus { outline:none; border-color:#44a08d; box-shadow:0 0 0 3px rgba(68,160,141,.15); }
+        .auth-form .submit { width:100%; margin-top:.5rem; padding:.7rem 1rem; border:none; border-radius:999px; background:linear-gradient(135deg,#4ecdc4,#44a08d); color:#fff; font-weight:600; cursor:pointer; }
+        .auth-msg { min-height:1.2rem; font-size:.95rem; margin-top:.5rem; }
+        .auth-msg.error { color:#c0392b; }
+        .auth-msg.success { color:#2d5a27; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo" onclick="handleLogoClick(event)" title="Go Home">
+                <i class="fas fa-leaf"></i>
+                EcoLearn
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-section="home">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="quizzes">
+                        <i class="fas fa-question-circle"></i> Quizzes
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="challenges">
+                        <i class="fas fa-trophy"></i> Challenges
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="leaderboard">
+                        <i class="fas fa-crown"></i> Leaderboard
+                    </a>
+                </li>
+                <li class="nav-item" id="profile-nav" style="display: none;">
+                    <a href="#" class="nav-link" data-section="profile">
+                        <i class="fas fa-user"></i> Profile
+                    </a>
+                </li>
+            </ul>
+            <!-- Auth action buttons (non-intrusive) -->
+            <div class="auth-actions">
+                <button class="auth-btn" onclick="openAuth('login')">Login</button>
+                <button class="auth-btn" onclick="openAuth('signup')">Sign Up</button>
+            </div>
+            <!-- Theme toggle -->
+            <div class="theme-toggle">
+                <i class="fas fa-moon" style="color:#fff;"></i>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="theme-checkbox" onclick="toggleTheme()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <!-- Logout button (shown when logged in) -->
+            <div id="logout-container" style="display: none; margin-left: 1rem;">
+                <button class="auth-btn" onclick="logout()">Logout</button>
+            </div>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1>🌱 EcoLearn: Learn & Play for a Greener Future</h1>
+                <p>Master environmental knowledge through fun quizzes and challenges!</p>
+                <button class="btn-primary" onclick="showSection('quizzes')">
+                    <i class="fas fa-play"></i> Start Quiz
+                </button>
+            </div>
+            
+            <div class="user-stats">
+                <div class="xp-container">
+                    <h3>Your Progress</h3>
+                    <div class="xp-info">
+                        <span id="current-xp">0</span> / <span id="max-xp">100</span> XP
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-progress" id="xp-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="level-badge">
+                    <i class="fas fa-star"></i>
+                    Level <span id="current-level">1</span>
+                </div>
+            </div>
+
+            <h2 class="section-title">Your Badges</h2>
+            <div class="badges-grid" id="home-badges">
+                <!-- Badges will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Quizzes Section -->
+        <section id="quizzes" class="section">
+            <h1 class="section-title">Environmental Quizzes</h1>
+            
+            <div class="user-stats">
+                <div class="xp-container">
+                    <h3>Quiz Progress</h3>
+                    <div class="xp-info">
+                        Score: <span id="quiz-score">0</span> | 
+                        Question <span id="current-question">1</span> of <span id="total-questions">5</span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-progress" id="quiz-progress" style="width: 20%"></div>
+                    </div>
+                </div>
+                <div class="level-badge">
+                    <i class="fas fa-brain"></i>
+                    <span id="quiz-xp-earned">0</span> XP
+                </div>
+            </div>
+
+            <div class="quiz-container">
+                <div class="question" id="question-text">
+                    Loading question...
+                </div>
+                <div class="options" id="quiz-options">
+                    <!-- Options will be populated by JavaScript -->
+                </div>
+                <div class="quiz-buttons">
+                    <button class="btn-primary" id="submit-answer" onclick="submitAnswer()">Submit Answer</button>
+                    <button class="btn-secondary" id="next-question" onclick="nextQuestion()" style="display: none;">Next Question</button>
+                    <button class="btn-secondary" onclick="resetQuiz()">Reset Quiz</button>
+                </div>
+                <div class="feedback" id="answer-feedback">
+                    <!-- Feedback will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Challenges Section -->
+        <section id="challenges" class="section">
+            <h1 class="section-title">Eco Challenges</h1>
+            <p style="text-align: center; margin-bottom: 2rem; color: #666;">
+                Take on these real-world challenges to earn XP and make a difference!
+            </p>
+            
+            <div class="challenges-list" id="challenges-list">
+                <!-- Challenges will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Leaderboard Section -->
+        <section id="leaderboard" class="section">
+            <h1 class="section-title">🏆 Leaderboard</h1>
+            <p style="text-align: center; margin-bottom: 2rem; color: #666;">
+                See how you rank against other eco-warriors!
+            </p>
+            
+            <div class="leaderboard-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>XP Points</th>
+                            <th>Level</th>
+                            <th>Badges</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Leaderboard data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="section">
+            <h1 class="section-title">Your Profile</h1>
+            
+            <div class="profile-container">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 id="profile-name">EcoWarrior</h2>
+                <button class="btn-secondary" onclick="editProfileName()">Edit Name</button>
+                
+                <div style="margin-top: 2rem;">
+                    <div style="display: flex; justify-content: space-around; margin-bottom: 2rem;">
+                        <div>
+                            <h3 style="color: #2d5a27;">Total XP</h3>
+                            <p style="font-size: 2rem; font-weight: bold;" id="profile-xp">0</p>
+                        </div>
+                        <div>
+                            <h3 style="color: #2d5a27;">Current Level</h3>
+                            <p style="font-size: 2rem; font-weight: bold;" id="profile-level">1</p>
+                        </div>
+                        <div>
+                            <h3 style="color: #2d5a27;">Badges Earned</h3>
+                            <p style="font-size: 2rem; font-weight: bold;" id="profile-badges">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #2d5a27; margin-bottom: 1rem;">Badge Collection</h3>
+                <div class="badges-grid" id="profile-badges-grid">
+                    <!-- Profile badges will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Badge Unlock Modal -->
+    <div id="badge-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>🎉 Congratulations!</h2>
+            <div id="modal-badge-icon" style="font-size: 4rem; margin: 1rem 0;"></div>
+            <h3 id="modal-badge-title"></h3>
+            <p id="modal-badge-description"></p>
+        </div>
+    </div>
+
+    <!-- Auth Modals -->
+    <div id="login-modal" class="modal-auth" hidden>
+        <div class="card">
+            <span class="close-x" onclick="closeAuth('login')">&times;</span>
+            <h3>Login</h3>
+            <form id="login-form" class="auth-form">
+                <div class="form-row">
+                    <label for="login-identifier">Username or Email</label>
+                    <input type="text" id="login-identifier" name="identifier" placeholder="yourname or you@example.com" required>
+                </div>
+                <div class="form-row">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="submit">Sign In</button>
+                <div id="login-message" class="auth-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="signup-modal" class="modal-auth" hidden>
+        <div class="card">
+            <span class="close-x" onclick="closeAuth('signup')">&times;</span>
+            <h3>Create Account</h3>
+            <form id="signup-form" class="auth-form">
+                <div class="form-row">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" name="username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-row">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" name="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-row">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="password" placeholder="At least 6 characters" minlength="6" required>
+                </div>
+                <button type="submit" class="submit">Create Account</button>
+                <div id="signup-message" class="auth-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Theme helpers
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.classList.toggle('dark', isDark);
+            const cb = document.getElementById('theme-checkbox');
+            if (cb) cb.checked = isDark;
+        }
+        function toggleTheme() {
+            const newTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem('ecolearn_theme', newTheme);
+            applyTheme(newTheme);
+        }
+
+        // Auth helper functions (global)
+        const API_BASE = '';
+        // Firebase config (replace with your project's keys)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+        };
+        let firebaseReady = false;
+        try {
+            if (window.firebase && firebase.apps && !firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            firebaseReady = !!(window.firebase && firebase.apps && firebase.apps.length);
+        } catch (e) { firebaseReady = false; }
+
+        async function exchangeCustomTokenForIdToken(customToken) {
+            if (!firebaseReady || !customToken) return null;
+            try {
+                await firebase.auth().signInWithCustomToken(customToken);
+                const user = firebase.auth().currentUser;
+                if (!user) return null;
+                const idToken = await user.getIdToken(true);
+                localStorage.setItem('ecolearn_idtoken', idToken);
+                return idToken;
+            } catch (e) {
+                console.warn('Failed to exchange custom token for ID token:', e);
+                return null;
+            }
+        }
+
+        // Auth-aware fetch helper
+        async function apiFetch(url, options = {}) {
+            const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+            const idToken = localStorage.getItem('ecolearn_idtoken');
+            if (idToken) headers['Authorization'] = 'Bearer ' + idToken;
+            const res = await fetch(API_BASE + url, { ...options, headers });
+            const body = await res.json().catch(() => ({}));
+            return { ok: res.ok, status: res.status, body };
+        }
+
+        // Quiz API
+        let serverQuizList = [];
+        let serverQuizIndex = -1;
+        async function fetchQuizzes() {
+            const { ok, body } = await apiFetch('/quizzes', { method: 'GET' });
+            if (!ok) throw new Error(body.error || body.message || 'Failed to fetch quizzes');
+            // Expecting { quizzes: [...] }
+            serverQuizList = body.quizzes || [];
+            if (!Array.isArray(serverQuizList)) serverQuizList = [];
+            return serverQuizList;
+        }
+        async function fetchQuizById(id) {
+            const { ok, body } = await apiFetch(`/quiz/${encodeURIComponent(id)}`, { method: 'GET' });
+            if (!ok) throw new Error(body.error || body.message || 'Failed to fetch quiz');
+            return body; // backend returns quiz object with questions
+        }
+        function transformServerQuizToLocal(serverQuiz) {
+            // Expecting serverQuiz.questions as array with fields matching backend format
+            // We'll normalize into our local {question, options, correct, explanation}
+            const transformed = (serverQuiz.questions || []).map(q => ({
+                question: q.question || 'Question',
+                options: q.options || [],
+                correct: typeof q.correct === 'number' ? q.correct : 0,
+                explanation: q.explanation || ''
+            }));
+            return transformed.length ? transformed : null;
+        }
+        function openAuth(which) {
+            const el = document.getElementById(which + '-modal');
+            if (el) {
+                el.hidden = false;
+                el.style.display = 'flex';
+            }
+        }
+        function closeAuth(which) {
+            const el = document.getElementById(which + '-modal');
+            if (el) {
+                el.hidden = true;
+                el.style.display = 'none';
+            }
+        }
+        async function postJSON(url, data) {
+            const res = await fetch(API_BASE + url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const body = await res.json().catch(() => ({}));
+            return { ok: res.ok, status: res.status, body };
+        }
+        async function verifyToken(token) {
+            try {
+                const res = await fetch(API_BASE + '/auth/verify', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json().catch(() => ({}));
+                return res.ok && data && data.valid;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Game State
+        function defaultGameState() {
+            return {
+                xp: 0,
+                level: 1,
+                score: 0,
+                currentQuestion: 0,
+                quizXP: 0,
+                unlockedBadges: [],
+                completedChallenges: [],
+                playerName: 'EcoWarrior'
+            };
+        }
+
+        let gameState = defaultGameState();
+
+        // Per-user state helpers
+        function getCurrentUser() {
+            try { return JSON.parse(localStorage.getItem('ecolearn_user') || 'null'); } catch { return null; }
+        }
+        function getGameStateKey() {
+            const user = getCurrentUser();
+            const userId = user && (user.user_id || user.id);
+            return userId ? `ecolearn-gamestate:${userId}` : null;
+        }
+        function loadGameStateForCurrentUser() {
+            const key = getGameStateKey();
+            if (!key) { gameState = defaultGameState(); return; }
+            let hadSaved = false;
+            try {
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    gameState = { ...defaultGameState(), ...JSON.parse(saved) };
+                    hadSaved = true;
+                } else {
+                    gameState = defaultGameState();
+                }
+            } catch {
+                gameState = defaultGameState();
+            }
+            // On first login (no saved state), initialize name from backend user record
+            if (!hadSaved) {
+                const user = getCurrentUser();
+                if (user && user.name) gameState.playerName = user.name;
+            }
+        }
+        function saveGameStateForCurrentUser() {
+            const key = getGameStateKey();
+            if (!key) return;
+            try { localStorage.setItem(key, JSON.stringify(gameState)); } catch {}
+        }
+        function clearAllGameState() {
+            // Optional: do not erase per-user stored states
+            gameState = defaultGameState();
+        }
+
+        // Quiz Data
+        const quizQuestions = [
+            {
+                question: "What percentage of plastic waste is currently recycled globally?",
+                options: ["Less than 10%", "About 25%", "About 50%", "Over 75%"],
+                correct: 0,
+                explanation: "Less than 10% of plastic waste is actually recycled globally, highlighting the urgent need for better waste management."
+            },
+            {
+                question: "Which renewable energy source produces the most electricity worldwide?",
+                options: ["Solar", "Wind", "Hydroelectric", "Geothermal"],
+                correct: 2,
+                explanation: "Hydroelectric power is currently the largest source of renewable electricity globally."
+            },
+            {
+                question: "How much water can a leaky faucet waste per day?",
+                options: ["1 gallon", "5 gallons", "10 gallons", "20+ gallons"],
+                correct: 3,
+                explanation: "A single leaky faucet can waste more than 20 gallons of water per day!"
+            },
+            {
+                question: "What is the main cause of deforestation worldwide?",
+                options: ["Urban development", "Agriculture", "Mining", "Natural disasters"],
+                correct: 1,
+                explanation: "Agriculture is responsible for about 80% of global deforestation."
+            },
+            {
+                question: "Which transportation method has the lowest carbon footprint per kilometer?",
+                options: ["Car", "Bus", "Train", "Airplane"],
+                correct: 2,
+                explanation: "Trains are generally the most carbon-efficient form of motorized transportation."
+            }
+        ];
+
+        // Multiple quizzes support: catalog of quiz sets (store deep copies to avoid mutating originals)
+        let quizBank = [
+            JSON.parse(JSON.stringify(quizQuestions)),
+            [
+                {
+                    question: "Which gas is the primary driver of current global warming?",
+                    options: ["Oxygen", "Carbon Dioxide (CO2)", "Nitrogen", "Hydrogen"],
+                    correct: 1,
+                    explanation: "CO2 is the main greenhouse gas driving current climate change due to human activities."
+                },
+                {
+                    question: "Which action saves the most household water?",
+                    options: ["Turning off tap while brushing", "Fixing leaks", "Watering lawn at noon", "Shorter showers"],
+                    correct: 1,
+                    explanation: "Fixing leaks can save significant amounts of water daily."
+                },
+                {
+                    question: "What is a major source of ocean plastic?",
+                    options: ["Fishing gear", "Glass bottles", "Metal scraps", "Sand"],
+                    correct: 0,
+                    explanation: "Lost and discarded fishing gear accounts for a large share of ocean plastic in some regions."
+                },
+                {
+                    question: "Which energy source is renewable?",
+                    options: ["Coal", "Oil", "Natural Gas", "Wind"],
+                    correct: 3,
+                    explanation: "Wind energy is renewable and emits no CO2 during operation."
+                },
+                {
+                    question: "Best way to reduce e-waste?",
+                    options: ["Incinerate electronics", "Buy longer-lasting devices", "Throw in general trash", "Export to landfill"],
+                    correct: 1,
+                    explanation: "Choosing durable devices and maintaining them reduces e-waste generation."
+                }
+            ]
+        ];
+        let currentQuizIndex = 0;
+
+        // Badges Data
+        const badges = [
+            {
+                id: 'eco-starter',
+                name: 'Eco Starter',
+                icon: '🌱',
+                description: 'Complete your first quiz',
+                requirement: () => gameState.quizXP >= 20,
+                xpRequired: 20
+            },
+            {
+                id: 'quiz-master',
+                name: 'Quiz Master',
+                icon: '🧠',
+                description: 'Score 100% on a quiz',
+                requirement: () => gameState.score === quizQuestions.length,
+                xpRequired: 50
+            },
+            {
+                id: 'waste-warrior',
+                name: 'Waste Warrior',
+                icon: '♻️',
+                description: 'Complete 3 eco challenges',
+                requirement: () => gameState.completedChallenges.length >= 3,
+                xpRequired: 75
+            },
+            {
+                id: 'energy-saver',
+                name: 'Energy Saver',
+                icon: '⚡',
+                description: 'Reach Level 3',
+                requirement: () => gameState.level >= 3,
+                xpRequired: 200
+            },
+            {
+                id: 'eco-champion',
+                name: 'Eco Champion',
+                icon: '👑',
+                description: 'Earn 500 XP',
+                requirement: () => gameState.xp >= 500,
+                xpRequired: 500
+            },
+            {
+                id: 'planet-protector',
+                name: 'Planet Protector',
+                icon: '🌍',
+                description: 'Complete all challenges',
+                requirement: () => gameState.completedChallenges.length >= 8,
+                xpRequired: 400
+            }
+        ];
+
+        // Challenges Data
+        const challenges = [
+            {
+                id: 'plant-tree',
+                title: 'Plant a Tree 🌱',
+                description: 'Plant a tree or donate to a tree-planting organization',
+                xp: 50,
+                completed: false
+            },
+            {
+                id: 'no-plastic',
+                title: 'Plastic-Free Day 🛑',
+                description: 'Avoid using single-use plastics for one full day',
+                xp: 30,
+                completed: false
+            },
+            {
+                id: 'bike-day',
+                title: 'Bike to Work 🚲',
+                description: 'Use a bicycle instead of a car for transportation',
+                xp: 25,
+                completed: false
+            },
+            {
+                id: 'energy-save',
+                title: 'Energy Conservation 💡',
+                description: 'Reduce home energy usage by 20% for a week',
+                xp: 40,
+                completed: false
+            },
+            {
+                id: 'water-save',
+                title: 'Water Warrior 💧',
+                description: 'Take shorter showers and fix any leaky faucets',
+                xp: 35,
+                completed: false
+            },
+            {
+                id: 'local-food',
+                title: 'Local Food Hero 🥬',
+                description: 'Buy only locally sourced food for a week',
+                xp: 45,
+                completed: false
+            },
+            {
+                id: 'recycle-champion',
+                title: 'Recycling Champion ♻️',
+                description: 'Properly sort and recycle all waste for a month',
+                xp: 60,
+                completed: false
+            },
+            {
+                id: 'eco-educator',
+                title: 'Eco Educator 📚',
+                description: 'Teach someone about environmental conservation',
+                xp: 55,
+                completed: false
+            }
+        ];
+
+        // Leaderboard Data
+        const leaderboardData = [
+            { name: 'GreenThumb99', xp: 1250, level: 8, badges: 6 },
+            { name: 'EcoMaster2024', xp: 980, level: 6, badges: 5 },
+            { name: 'NatureLover', xp: 750, level: 5, badges: 4 },
+            { name: 'ClimateAction', xp: 520, level: 4, badges: 3 },
+            { name: 'TreeHugger', xp: 340, level: 3, badges: 2 }
+        ];
+
+        // Toggle Navbar UI on auth state
+        function showLoggedInUI(username) {
+            const profileNav = document.getElementById('profile-nav');
+            const authActions = document.querySelector('.auth-actions');
+            const logoutC = document.getElementById('logout-container');
+            if (profileNav) profileNav.style.display = '';
+            if (authActions) authActions.style.display = 'none';
+            if (logoutC) logoutC.style.display = '';
+        }
+        function showLoggedOutUI() {
+            const profileNav = document.getElementById('profile-nav');
+            const authActions = document.querySelector('.auth-actions');
+            const logoutC = document.getElementById('logout-container');
+            if (profileNav) profileNav.style.display = 'none';
+            if (authActions) authActions.style.display = '';
+            if (logoutC) logoutC.style.display = 'none';
+        }
+
+        // Logout handler (global)
+        function logout() {
+            try { localStorage.removeItem('ecolearn_token'); } catch (e) {}
+            try { localStorage.removeItem('ecolearn_idtoken'); } catch (e) {}
+            try { localStorage.removeItem('ecolearn_user'); } catch (e) {}
+            showLoggedOutUI();
+            // Ensure any auth modals are closed
+            closeAuth('login');
+            closeAuth('signup');
+            // Navigate to Home
+            showSection('home');
+            // Reset in-memory state and re-render
+            clearAllGameState();
+            updateDisplay();
+            renderBadges();
+            renderProfile();
+            // Refresh leaderboard to fallback/local without user context
+            try { renderLeaderboard(); } catch (e) {}
+        }
+
+        // Login: supports username or email in one field
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Apply saved theme early
+            try {
+                const savedTheme = localStorage.getItem('ecolearn_theme') || 'light';
+                applyTheme(savedTheme);
+            } catch (e) { /* ignore */ }
+            const loginForm = document.getElementById('login-form');
+            const loginMsg = document.getElementById('login-message');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    loginMsg.textContent = '';
+                    loginMsg.className = 'auth-msg';
+
+                    const identifier = (document.getElementById('login-identifier').value || '').trim();
+                    const password = document.getElementById('login-password').value;
+                    // Backend expects email; if user entered username, you may map it server-side. Here we pass as email if contains '@'
+                    const payload = identifier.includes('@') ? { email: identifier, password } : { email: identifier, password };
+
+                    const { ok, body } = await postJSON('/auth/login', payload);
+                    if (ok) {
+                        loginMsg.textContent = body.message || 'Login successful!';
+                        loginMsg.classList.add('success');
+                        // Store token (custom_token from backend or token if provided)
+                        const token = body.token || body.custom_token;
+                        if (token) localStorage.setItem('ecolearn_token', token);
+                        // Obtain Firebase ID token for protected API calls
+                        if (token) {
+                            await exchangeCustomTokenForIdToken(token);
+                        }
+                        // Store current user info for per-user state
+                        const currentUser = {
+                            user_id: body.user_id || body.user?.uid || null,
+                            email: body.email || identifier,
+                            name: body.name || body.user?.displayName || identifier.split('@')[0]
+                        };
+                        localStorage.setItem('ecolearn_user', JSON.stringify(currentUser));
+                        // Load per-user game state
+                        loadGameStateForCurrentUser();
+                        // Update UI and close modal
+                        showLoggedInUI(body.user?.displayName || identifier);
+                        closeAuth('login');
+                        showSection('home');
+                        // Re-render views with user-specific data
+                        updateDisplay();
+                        renderBadges();
+                        renderProfile();
+                        // Refresh leaderboard for this user
+                        try { await renderLeaderboard(); } catch (e) {}
+                        // Prefetch quizzes for smoother UX
+                        try { await fetchQuizzes(); } catch (e) {}
+                    } else {
+                        loginMsg.textContent = body.error || body.message || 'Login failed';
+                        loginMsg.classList.add('error');
+                    }
+                });
+
+        async function verifyToken(token) {
+            try {
+                const res = await fetch('/auth/verify', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json().catch(() => ({}));
+                return res.ok && data && data.valid;
+            } catch (e) {
+                return false;
+            }
+        }
+            }
+
+            const signupForm = document.getElementById('signup-form');
+            const signupMsg = document.getElementById('signup-message');
+            if (signupForm) {
+                signupForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    signupMsg.textContent = '';
+                    signupMsg.className = 'auth-msg';
+
+                    const username = (document.getElementById('signup-username').value || '').trim();
+                    const email = (document.getElementById('signup-email').value || '').trim();
+                    const password = document.getElementById('signup-password').value;
+
+                    const payload = { name: username, email, password };
+                    const { ok, body } = await postJSON('/auth/signup', payload);
+                    if (ok) {
+                        signupMsg.textContent = body.message || 'Signup successful!';
+                        signupMsg.classList.add('success');
+                        // Store token (custom_token from backend)
+                        const token = body.token || body.custom_token;
+                        if (token) localStorage.setItem('ecolearn_token', token);
+                        if (token) {
+                            await exchangeCustomTokenForIdToken(token);
+                        }
+                        // Store current user info for per-user state
+                        const currentUser = {
+                            user_id: body.user_id || body.user?.uid || null,
+                            email: body.email || email,
+                            name: body.name || username
+                        };
+                        localStorage.setItem('ecolearn_user', JSON.stringify(currentUser));
+                        // Load per-user game state
+                        loadGameStateForCurrentUser();
+                        showLoggedInUI(username);
+                        closeAuth('signup');
+                        showSection('home');
+                        // Re-render views
+                        updateDisplay();
+                        renderBadges();
+                        renderProfile();
+                        // Prefetch quizzes
+                        try { await fetchQuizzes(); } catch (e) {}
+                    } else {
+                        signupMsg.textContent = body.error || body.message || 'Signup failed';
+                        signupMsg.classList.add('error');
+                    }
+                });
+            }
+
+            // Initialize UI from stored token (no verification because backend returns custom_token)
+            const token = localStorage.getItem('ecolearn_token');
+            if (token) {
+                // Try to ensure we have an ID token for API
+                const existingId = localStorage.getItem('ecolearn_idtoken');
+                if (!existingId) {
+                    await exchangeCustomTokenForIdToken(token);
+                }
+                showLoggedInUI();
+                // Prefetch quizzes if possible
+                try { await fetchQuizzes(); } catch (e) {}
+            } else { showLoggedOutUI(); }
+
+            // Initialize the application
+            initializeApp();
+            loadQuiz();
+            updateDisplay();
+            renderBadges();
+            renderChallenges();
+            await renderLeaderboard();
+            renderProfile();
+        });
+
+        // Navigation Functions
+        function initializeApp() {
+            // Mobile menu toggle
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const navMenu = document.querySelector('.nav-menu');
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+            });
+
+            // Navigation links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = link.getAttribute('data-section');
+                    showSection(section);
+                    
+                    // Update active link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    
+                    // Close mobile menu
+                    navMenu.classList.remove('active');
+                });
+            });
+
+            // Modal close functionality
+            const modal = document.getElementById('badge-modal');
+            const closeBtn = document.querySelector('.close');
+            
+            closeBtn.onclick = () => modal.style.display = 'none';
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        }
+
+        function isLoggedIn() {
+            return !!localStorage.getItem('ecolearn_token');
+        }
+
+        // Logo click: refresh and go Home only when logged in
+        function handleLogoClick(event) {
+            event.preventDefault();
+            if (isLoggedIn()) {
+                // Ensure Home section is active, then hard reload
+                try { showSection('home'); } catch (e) {}
+                // Reload the page to refresh UI/state (token persists in localStorage)
+                window.location.reload();
+            } else {
+                // Not logged in: open login modal instead of navigating
+                openAuth('login');
+            }
+        }
+
+        function showSection(sectionName) {
+            // Require login for all sections except 'home'
+            if (sectionName !== 'home' && !isLoggedIn()) {
+                openAuth('login');
+                return;
+            }
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show target section
+            document.getElementById(sectionName).classList.add('active');
+        }
+
+        // Quiz Functions
+        function loadQuiz() {
+            if (gameState.currentQuestion >= quizQuestions.length) {
+                showQuizComplete();
+                return;
+            }
+
+            const question = quizQuestions[gameState.currentQuestion];
+            document.getElementById('question-text').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <input type="radio" name="quiz-option" value="${index}" id="option-${index}">
+                    <label for="option-${index}">${option}</label>
+                `;
+                optionDiv.addEventListener('click', () => {
+                    document.getElementById(`option-${index}`).checked = true;
+                });
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            // Update progress
+            document.getElementById('current-question').textContent = gameState.currentQuestion + 1;
+            document.getElementById('total-questions').textContent = quizQuestions.length;
+            const progress = ((gameState.currentQuestion + 1) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress').style.width = progress + '%';
+
+            // Reset UI
+            document.getElementById('submit-answer').style.display = 'inline-block';
+            document.getElementById('next-question').style.display = 'none';
+            document.getElementById('answer-feedback').style.display = 'none';
+        }
+
+        function submitAnswer() {
+            const selectedOption = document.querySelector('input[name="quiz-option"]:checked');
+            if (!selectedOption) {
+                alert('Please select an answer!');
+                return;
+            }
+
+            const question = quizQuestions[gameState.currentQuestion];
+            const selectedValue = parseInt(selectedOption.value);
+            const isCorrect = selectedValue === question.correct;
+            
+            // Show feedback
+            const feedback = document.getElementById('answer-feedback');
+            feedback.style.display = 'block';
+            feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            feedback.innerHTML = `
+                <strong>${isCorrect ? '✅ Correct!' : '❌ Incorrect!'}</strong><br>
+                ${question.explanation}
+            `;
+
+            // Update score and XP
+            if (isCorrect) {
+                gameState.score++;
+                gameState.quizXP += 10;
+                addXP(10);
+            }
+
+            // Update UI
+            document.getElementById('submit-answer').style.display = 'none';
+            document.getElementById('next-question').style.display = 'inline-block';
+            document.getElementById('quiz-score').textContent = gameState.score;
+            document.getElementById('quiz-xp-earned').textContent = gameState.quizXP;
+
+            // Disable options
+            document.querySelectorAll('input[name="quiz-option"]').forEach(input => {
+                input.disabled = true;
+            });
+        }
+
+        function nextQuestion() {
+            gameState.currentQuestion++;
+            loadQuiz();
+        }
+
+        // Ensure quiz container has the expected structure
+        function renderQuizLayout() {
+            const quizContainer = document.querySelector('.quiz-container');
+            if (!quizContainer) return;
+            quizContainer.innerHTML = `
+                <div class="question" id="question-text">Loading question...</div>
+                <div class="options" id="quiz-options"></div>
+                <div class="quiz-buttons">
+                    <button class="btn-primary" id="submit-answer" onclick="submitAnswer()">Submit Answer</button>
+                    <button class="btn-secondary" id="next-question" onclick="nextQuestion()" style="display: none;">Next Question</button>
+                    <button class="btn-secondary" onclick="resetQuiz()">Reset Quiz</button>
+                </div>
+                <div class="feedback" id="answer-feedback"></div>
+            `;
+        }
+
+        function resetQuiz() {
+            gameState.currentQuestion = 0;
+            gameState.score = 0;
+            gameState.quizXP = 0;
+            // Update top progress widgets
+            const scoreEl = document.getElementById('quiz-score');
+            const xpEl = document.getElementById('quiz-xp-earned');
+            if (scoreEl) scoreEl.textContent = '0';
+            if (xpEl) xpEl.textContent = '0';
+            // Rebuild quiz UI and load first question
+            renderQuizLayout();
+            loadQuiz();
+        }
+
+        function showQuizComplete() {
+            const quizContainer = document.querySelector('.quiz-container');
+            quizContainer.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h2>🎉 Quiz Complete!</h2>
+                    <p style="font-size: 1.2rem; margin: 1rem 0;">
+                        Final Score: ${gameState.score}/${quizQuestions.length}
+                    </p>
+                    <p style="font-size: 1.1rem; margin: 1rem 0; color: #4ecdc4;">
+                        You earned ${gameState.quizXP} XP!
+                    </p>
+                    <div style="display:flex; gap: 0.75rem; justify-content:center; flex-wrap:wrap;">
+                        <button class="btn-primary" onclick="resetQuiz()">Take Quiz Again</button>
+                        <button class="btn-secondary" onclick="takeNextQuiz()">Take Next Quiz</button>
+                    </div>
+                </div>
+            `;
+            
+            // Check for badge unlocks
+            checkBadgeUnlocks();
+        }
+
+        // Load next quiz from quizBank
+        async function takeNextQuiz() {
+            const hasId = !!localStorage.getItem('ecolearn_idtoken');
+            if (hasId) {
+                try {
+                    if (!serverQuizList.length) {
+                        await fetchQuizzes();
+                        serverQuizIndex = -1;
+                    }
+                    if (serverQuizList.length) {
+                        serverQuizIndex = (serverQuizIndex + 1) % serverQuizList.length;
+                        const item = serverQuizList[serverQuizIndex] || {};
+                        const quizId = item.id || item.quiz_id || item.uid || item._id;
+                        if (quizId) {
+                            const serverQuiz = await fetchQuizById(quizId);
+                            const normalized = transformServerQuizToLocal(serverQuiz);
+                            if (normalized && normalized.length) {
+                                // Replace current question set with server quiz
+                                quizQuestions.length = 0;
+                                normalized.forEach(q => quizQuestions.push(q));
+                                showSection('quizzes');
+                                resetQuiz();
+                                return;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Falling back to local quiz bank:', e);
+                }
+            }
+            // Fallback to local quiz bank
+            currentQuizIndex = (currentQuizIndex + 1) % quizBank.length;
+            const nextSet = JSON.parse(JSON.stringify(quizBank[currentQuizIndex]));
+            quizQuestions.length = 0;
+            nextSet.forEach(q => quizQuestions.push(q));
+            showSection('quizzes');
+            resetQuiz();
+        }
+
+        // XP and Level Functions
+        function addXP(amount) {
+            gameState.xp += amount;
+            const newLevel = Math.floor(gameState.xp / 100) + 1;
+            
+            if (newLevel > gameState.level) {
+                levelUp(newLevel);
+            }
+            
+            updateDisplay();
+            checkBadgeUnlocks();
+            // Persist per-user progress and refresh leaderboard row for self
+            try { saveGameStateForCurrentUser(); renderLeaderboard(); } catch (e) {}
+        }
+
+        function levelUp(newLevel) {
+            const oldLevel = gameState.level;
+            gameState.level = newLevel;
+            
+            // Show confetti animation
+            createConfetti();
+            
+            // Show level up notification
+            setTimeout(() => {
+                showBadgeModal('🎉', `Level Up!`, `Congratulations! You reached Level ${newLevel}!`);
+            }, 500);
+        }
+
+        function updateDisplay() {
+            const currentXP = gameState.xp % 100;
+            const maxXP = 100;
+            
+            document.getElementById('current-xp').textContent = currentXP;
+            document.getElementById('max-xp').textContent = maxXP;
+            document.getElementById('current-level').textContent = gameState.level;
+            
+            const progressPercent = (currentXP / maxXP) * 100;
+            document.getElementById('xp-progress').style.width = progressPercent + '%';
+        }
+
+        // Badge Functions
+        function checkBadgeUnlocks() {
+            badges.forEach(badge => {
+                if (!gameState.unlockedBadges.includes(badge.id) && badge.requirement()) {
+                    unlockBadge(badge);
+                }
+            });
+        }
+
+        function unlockBadge(badge) {
+            gameState.unlockedBadges.push(badge.id);
+            showBadgeModal(badge.icon, badge.name, badge.description);
+            renderBadges();
+            renderProfile();
+        }
+
+        function renderBadges() {
+            const homeBadges = document.getElementById('home-badges');
+            const profileBadges = document.getElementById('profile-badges-grid');
+            
+            homeBadges.innerHTML = '';
+            profileBadges.innerHTML = '';
+            
+            badges.forEach(badge => {
+                const isUnlocked = gameState.unlockedBadges.includes(badge.id);
+                const badgeHTML = `
+                    <div class="badge-card ${isUnlocked ? '' : 'locked'}">
+                        <div class="badge-icon">${badge.icon}</div>
+                        <h3>${badge.name}</h3>
+                        <p>${badge.description}</p>
+                        ${!isUnlocked ? `<small>Requires ${badge.xpRequired} XP</small>` : ''}
+                    </div>
+                `;
+                
+                homeBadges.innerHTML += badgeHTML;
+                profileBadges.innerHTML += badgeHTML;
+            });
+        }
+
+        function showBadgeModal(icon, title, description) {
+            document.getElementById('modal-badge-icon').textContent = icon;
+            document.getElementById('modal-badge-title').textContent = title;
+            document.getElementById('modal-badge-description').textContent = description;
+            document.getElementById('badge-modal').style.display = 'block';
+        }
+
+        // Challenge Functions
+        function renderChallenges() {
+            const challengesList = document.getElementById('challenges-list');
+            challengesList.innerHTML = '';
+            
+            challenges.forEach(challenge => {
+                const isCompleted = gameState.completedChallenges.includes(challenge.id);
+                const challengeHTML = `
+                    <div class="challenge-item">
+                        <div class="challenge-info">
+                            <div class="challenge-title">${challenge.title}</div>
+                            <div class="challenge-description">${challenge.description}</div>
+                            <div class="challenge-xp">Reward: ${challenge.xp} XP</div>
+                        </div>
+                        <button class="btn-success" onclick="completeChallenge('${challenge.id}')" 
+                                ${isCompleted ? 'disabled' : ''}>
+                            ${isCompleted ? '✅ Completed' : 'Join Challenge'}
+                        </button>
+                    </div>
+                `;
+                challengesList.innerHTML += challengeHTML;
+            });
+        }
+
+        function completeChallenge(challengeId) {
+            const challenge = challenges.find(c => c.id === challengeId);
+            if (challenge && !gameState.completedChallenges.includes(challengeId)) {
+                gameState.completedChallenges.push(challengeId);
+                addXP(challenge.xp);
+                renderChallenges();
+                
+                // Show completion message
+                showBadgeModal('🎉', 'Challenge Complete!', `You earned ${challenge.xp} XP for completing "${challenge.title}"!`);
+            }
+        }
+
+        // Leaderboard Functions
+        async function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboard-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const currentUser = getCurrentUser();
+            const hasId = !!localStorage.getItem('ecolearn_idtoken');
+            try {
+                if (hasId) {
+                    const { ok, body } = await apiFetch('/leaderboard', { method: 'GET' });
+                    if (ok) {
+                        const rows = body.players || body.leaderboard || body.data || body || [];
+                        const arr = Array.isArray(rows) ? rows : [];
+                        // Normalize and render
+                        const normalized = arr.map(p => ({
+                            name: p.name || p.displayName || p.username || 'Player',
+                            xp: p.xp ?? p.points ?? 0,
+                            level: p.level ?? 1,
+                            badges: Array.isArray(p.badges) ? p.badges.length : (p.badges ?? 0),
+                            uid: p.uid || p.user_id || p.id || null,
+                            is_current: !!p.is_current
+                        }));
+                        normalized.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+                        normalized.forEach((player, index) => {
+                            const isCurrent = player.is_current || (currentUser && player.uid && (player.uid === currentUser.user_id)) || (player.name === gameState.playerName);
+                            tbody.insertAdjacentHTML('beforeend', `
+                                <tr class="${isCurrent ? 'current-user' : ''}">
+                                    <td>${index + 1}</td>
+                                    <td>${player.name}${isCurrent ? ' (You)' : ''}</td>
+                                    <td>${player.xp}</td>
+                                    <td>${player.level}</td>
+                                    <td>${player.badges}</td>
+                                </tr>
+                            `);
+                        });
+                        return;
+                    }
+                }
+            } catch (e) {
+                // ignore and fallback
+            }
+
+            // Fallback: local mock + current player
+            const local = [...leaderboardData, {
+                name: gameState.playerName,
+                xp: gameState.xp,
+                level: gameState.level,
+                badges: gameState.unlockedBadges.length
+            }];
+            local.sort((a, b) => b.xp - a.xp);
+            local.forEach((player, index) => {
+                const isCurrent = player.name === gameState.playerName;
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="${isCurrent ? 'current-user' : ''}">
+                        <td>${index + 1}</td>
+                        <td>${player.name}${isCurrent ? ' (You)' : ''}</td>
+                        <td>${player.xp}</td>
+                        <td>${player.level}</td>
+                        <td>${player.badges}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        // Profile Functions
+        function renderProfile() {
+            document.getElementById('profile-name').textContent = gameState.playerName;
+            document.getElementById('profile-xp').textContent = gameState.xp;
+            document.getElementById('profile-level').textContent = gameState.level;
+            document.getElementById('profile-badges').textContent = gameState.unlockedBadges.length;
+        }
+
+        async function updateUserProfileName(newName) {
+            const user = getCurrentUser();
+            if (!user || !user.user_id) return false;
+            try {
+                const { ok } = await apiFetch(`/user/${encodeURIComponent(user.user_id)}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ name: newName })
+                });
+                return ok;
+            } catch (e) { return false; }
+        }
+
+        async function editProfileName() {
+            const newName = prompt('Enter your new name:', gameState.playerName);
+            if (newName && newName.trim()) {
+                const trimmed = newName.trim();
+                // Optimistically update UI
+                gameState.playerName = trimmed;
+                renderProfile();
+                try { saveGameStateForCurrentUser(); } catch (e) {}
+                // Persist to backend so it survives logout/login
+                const ok = await updateUserProfileName(trimmed);
+                if (ok) {
+                    // Update cached user object
+                    try {
+                        const u = getCurrentUser() || {};
+                        u.name = trimmed;
+                        localStorage.setItem('ecolearn_user', JSON.stringify(u));
+                    } catch (e) {}
+                }
+                try { renderLeaderboard(); } catch (e) {}
+            }
+        }
+
+        // Animation Functions
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 50);
+            }
+        }
+
+        // Smooth scrolling for navigation
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('[data-section]')) {
+                e.preventDefault();
+                const targetSection = e.target.getAttribute('data-section');
+                showSection(targetSection);
+            }
+        });
+
+        // Auto-save game state per user (in a real app, this would save to a backend)
+        setInterval(() => {
+            saveGameStateForCurrentUser();
+        }, 30000);
+
+        // Load saved game state for current user at boot (called after auth init)
+        try {
+            loadGameStateForCurrentUser();
+        } catch (e) {
+            // ignore
+        }
+    </script>
+</body>
+</html>
